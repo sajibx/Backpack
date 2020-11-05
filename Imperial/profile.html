@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
 
-    <title>Login</title>
+    <title>Profile</title>
     <meta content="" name="description">
     <meta content="" name="keywords">
 
@@ -49,7 +49,7 @@
     ======================================================== -->
 </head>
 
-<body>
+<body onload="load()">
 
 <!-- ======= Header ======= -->
 <header id="header">
@@ -61,9 +61,12 @@
 
         <nav class="nav-menu d-none d-lg-block">
             <ul>
-
                 <li><a href="index.html">Home</a></li>
-                <li><a href="register.html">Register</a></li>
+                <li><a href="product_request.html">Request</a></li>
+                <li><a onclick="pend()">Pending</a></li>
+                <li><a href="user_approved.html">Approved</a></li>
+                <li><a href="profile.html">Profile</a></li>
+                <li><a onclick="logout()">Logout</a></li>
 
             </ul>
         </nav><!-- .nav-menu -->
@@ -88,33 +91,29 @@
         </div>
     </section><!-- End Breadcrumbs -->
 
-    <div style="margin-left: 10%">
-
-        <form>
-            <label for="phone"> Phone Number:</label><br>
-            <input type="number" maxlength="11" id="phone" name="phone"><br>
-            <label for="pass">Password:</label><br>
-            <input type="password" id="pass" name="fname"><br>
-
-            <br>
-        </form>
-
-        <br>
-
-        <button onclick="myform()">submit</button>
-
-    </div>
-
     <section class="inner-page">
         <div class="container">
-            <p>
-
-            </p>
+            <div class="actions" style="border: 2px solid black;margin-right: 20%;padding: 2%">
+                <a class="btn-get-started" id="name"></a>
+                <button style="float: right" onclick="logout()">logout</button>
+            </div>
         </div>
+        <br>
+        <div class="container">
+            <div class="actions" style="border: 2px solid black;margin-right: 20%;padding: 2%">
+                <a class="btn-get-started" id="phone"></a>
+            </div>
+        </div>
+        <br>
+        <div class="container">
+            <div class="actions" style="border: 2px solid black;margin-right: 20%;padding: 2%">
+                <a class="btn-get-started" id="addresses"></a>
+            </div>
+        </div>
+        <br>
     </section>
 
 </main><!-- End #main -->
-
 
 <!-- ======= Footer ======= -->
 <footer id="footer">
@@ -156,82 +155,65 @@
 <!-- Template Main JS File -->
 <script src="assets/js/main.js"></script>
 
+</body>
 
 <script>
-    function myform()
+    function load()
     {
-        //let s = document.getElementById("fname").value
-        //alert($("#phone").val().toString())
-
-
-                if ($("#phone").val().toString())
-                {
-                    ;
-                    if ($("#pass").val().toString())
+        $.ajax(
+            {
+                url: "http://localhost:8081/home/profile",
+                type: "POST",
+                contentType: "application/json",
+                headers:
                     {
-                            //alert("valid")
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
 
-
-
-
-                            $.ajax(
-                                {
-                                    url: "http://localhost:8081/home/login",
-                                    type: "POST",
-                                    contentType: "application/json",
-                                    headers:
-                                        {
-                                            'Accept': 'application/json',
-                                            'Content-Type': 'application/json'
-
-                                        },
-                                    data: JSON.stringify({
-                                        name: $("#phone").val(),
-                                        pass: $("#pass").val()
-                                    }),
-                                    dataType: "json",
-                                    success: function (response)
-                                    {
-                                        //alert(response.name.toString())
-                                        if (response.name.toString() === "user dosent exist")
-                                        {
-                                            alert(response.name.toString())
-                                        }
-                                        else if (response.name.toString() === "credienials dosent match")
-                                        {
-                                            alert(response.name.toString())
-                                        }
-                                        else
-                                        {
-                                            localStorage.setItem("login", response.name.toString())
-                                            localStorage.setItem("login1", response.game.toString())
-                                            window.open("product_request.html", "_self");
-                                        }
-                                    }
-                                    , error: function (error) {
-                                        //alert(error.value.toString())
-                                        alert("error")
-                                    }
-                                }
-                            )
-
-
-                    }
-                    else
-                    {
-                        alert("invalid password")
-                    }
-                }
-                else
+                    },
+                data: JSON.stringify({
+                    name: localStorage.getItem("login"),
+                    game: ""
+                }),
+                dataType: "json",
+                success: function (response)
                 {
-                    alert("invalid phone number")
+                    document.getElementById("name").innerHTML = response.fullname
+                    document.getElementById("phone").innerHTML = response.phonenumber
+                    document.getElementById("addresses").innerHTML = response.address
                 }
-
-
+                , error: function (error) {
+                    //alert(error.value.toString())
+                    alert("error")
+                }
+            }
+        )
     }
 </script>
 
-</body>
+<script>
+    function logout()
+    {
+        localStorage.removeItem("login")
+        localStorage.removeItem("login1")
 
+        window.open("index.html", "_self");
+    }
+</script>
+
+<script>
+    function pend()
+    {
+        let st = localStorage.getItem("login1")
+        if (st === "customer")
+        {
+            window.open("user_pending.html", "_self");
+        }
+        else
+        {
+            window.open("user_pending1.html", "_self");
+        }
+    }
+</script>
 
 </html>

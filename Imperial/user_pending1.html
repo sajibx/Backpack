@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
 
-    <title>Login</title>
+    <title>Pending</title>
     <meta content="" name="description">
     <meta content="" name="keywords">
 
@@ -49,7 +49,7 @@
     ======================================================== -->
 </head>
 
-<body>
+<body onload="load()">
 
 <!-- ======= Header ======= -->
 <header id="header">
@@ -63,7 +63,11 @@
             <ul>
 
                 <li><a href="index.html">Home</a></li>
-                <li><a href="register.html">Register</a></li>
+                <li><a href="product_request.html">Request</a></li>
+                <li><a onclick="pend()">Pending</a></li>
+                <li><a href="user_approved.html">Approved</a></li>
+                <li><a href="profile.html">Profile</a></li>
+                <li><a onclick="logout()">Logout</a></li>
 
             </ul>
         </nav><!-- .nav-menu -->
@@ -90,18 +94,25 @@
 
     <div style="margin-left: 10%">
 
-        <form>
-            <label for="phone"> Phone Number:</label><br>
-            <input type="number" maxlength="11" id="phone" name="phone"><br>
-            <label for="pass">Password:</label><br>
-            <input type="password" id="pass" name="fname"><br>
-
-            <br>
-        </form>
 
         <br>
 
-        <button onclick="myform()">submit</button>
+
+        <div hidden class="actions" style="border: 2px solid black;margin-right: 20%;padding: 2%">
+            <a class="btn-get-started" onclick="test()">Get Strated</a>
+            <a class="btn-services">Our Services</a>
+            <br>
+            <button style="float: right">Approve</button>
+            <input style="float: right; width: 5%">
+            <br>
+        </div>
+
+
+
+        <div id="zz">
+
+        </div>
+
 
     </div>
 
@@ -164,19 +175,126 @@
         //alert($("#phone").val().toString())
 
 
-                if ($("#phone").val().toString())
-                {
-                    ;
-                    if ($("#pass").val().toString())
+        if ($("#phone").val().toString())
+        {
+            ;
+            if ($("#pass").val().toString())
+            {
+                //alert("valid")
+
+
+
+
+                $.ajax(
                     {
-                            //alert("valid")
+                        url: "http://localhost:8081/home/login",
+                        type: "POST",
+                        contentType: "application/json",
+                        headers:
+                            {
+                                'Accept': 'application/json',
+                                'Content-Type': 'application/json'
+
+                            },
+                        data: JSON.stringify({
+                            name: $("#phone").val(),
+                            pass: $("#pass").val()
+                        }),
+                        dataType: "json",
+                        success: function (response)
+                        {
+                            //alert(response.name.toString())
+                            if (response.name.toString() === "user dosent exist")
+                            {
+                                alert(response.name.toString())
+                            }
+                            else if (response.name.toString() === "credienials dosent match")
+                            {
+                                alert(response.name.toString())
+                            }
+                            else
+                            {
+                                localStorage.setItem("login", response.name.toString())
+                                window.open("user_pending.html", "_self");
+                            }
+                        }
+                        , error: function (error) {
+                            //alert(error.value.toString())
+                            alert("error")
+                        }
+                    }
+                )
+
+
+            }
+            else
+            {
+                alert("invalid password")
+            }
+        }
+        else
+        {
+            alert("invalid phone number")
+        }
+
+
+    }
+</script>
+
+<script>
+    function load()
+    {
+        if (localStorage.getItem("login") === null)
+        {
+            window.open("index.html", "_self");
+        }
+        else
+        {
+            $.ajax(
+                {
+                    url: "http://localhost:8081/home/pending",
+                    type: "POST",
+                    contentType: "application/json",
+                    headers:
+                        {
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json'
+
+                        },
+                    data: JSON.stringify({
+                        name: localStorage.getItem("login"),
+                        game: ""
+                    }),
+                    dataType: "json",
+                    success: function (response)
+                    {
+                        //alert(response.name.toString())
+                        for (let products of response) {
+                            let mydiv = '        <div class="actions" style="border: 2px solid black;margin-right: 20%;margin-bottom: 2%;padding: 2%">\n' +
+                                '            <a class="btn-get-started" onclick="test()">'+products.product_url+'</a>\n' +
+                                '            <a class="btn-services">(Our Services)</a>\n' +
+                                '<br>\n' +
+                                '            <button class="clickClass" id="'+products.id+'" style="float: right">'+products.product_status+'</button>\n' +
+                                '            <input hidden name="'+products.id+'" style="float: right; width: 5%">\n' +
+                                '            <br>'+
+                                '        </div>'
+                            $("#zz").append(mydiv)
+                        }
+                        $(".clickClass").click(function ()
+                        {
 
 
 
+
+
+
+                            let t = "http://localhost:8081/home/approv/"
+                            let s = this.id.toString()
+                            let ts = t.concat(s)
 
                             $.ajax(
                                 {
-                                    url: "http://localhost:8081/home/login",
+                                    url: ts,
                                     type: "POST",
                                     contentType: "application/json",
                                     headers:
@@ -186,50 +304,75 @@
 
                                         },
                                     data: JSON.stringify({
-                                        name: $("#phone").val(),
-                                        pass: $("#pass").val()
+                                        name: localStorage.getItem("login"),
+                                        game: ""
                                     }),
                                     dataType: "json",
                                     success: function (response)
                                     {
-                                        //alert(response.name.toString())
-                                        if (response.name.toString() === "user dosent exist")
-                                        {
-                                            alert(response.name.toString())
-                                        }
-                                        else if (response.name.toString() === "credienials dosent match")
-                                        {
-                                            alert(response.name.toString())
-                                        }
-                                        else
-                                        {
-                                            localStorage.setItem("login", response.name.toString())
-                                            localStorage.setItem("login1", response.game.toString())
-                                            window.open("product_request.html", "_self");
-                                        }
+                                        load()
                                     }
                                     , error: function (error) {
                                         //alert(error.value.toString())
-                                        alert("error")
+                                        //alert("error")
+                                        load()
                                     }
                                 }
                             )
 
 
-                    }
-                    else
-                    {
-                        alert("invalid password")
-                    }
-                }
-                else
-                {
-                    alert("invalid phone number")
-                }
 
 
+
+
+
+
+
+
+                            //sell(this.id)
+                        });
+                    }
+                    , error: function (error) {
+                        //alert(error.value.toString())
+                        //alert("error")
+                    }
+                }
+            )
+        }
+    }
+
+
+    function sell(k)
+    {
+        alert(k.toString())
     }
 </script>
+
+<script>
+    function logout()
+    {
+        localStorage.removeItem("login")
+        localStorage.removeItem("login1")
+
+        window.open("index.html", "_self");
+    }
+</script>
+
+<script>
+    function pend()
+    {
+        let st = localStorage.getItem("login1")
+        if (st === "customer")
+        {
+            window.open("user_pending.html", "_self");
+        }
+        else
+        {
+            window.open("user_pending1.html", "_self");
+        }
+    }
+</script>
+
 
 </body>
 

@@ -53,6 +53,12 @@ interface ProductRepository : JpaRepository<Products, Long> {
     @Query("select pr from Products pr where pr.product_url = ?1 or pr.buyer_name = ?2")
     fun getByKey2(key_data: String?) : MutableList<Products>
 
+    @Query("select ps from Products ps where  ps.product_status = ?1")
+    fun getByKey3(key_data: String?): MutableList<Products>
+
+    @Query("select ps from Products ps where ps.productprice = ?1 and ps.product_status = ?2")
+    fun getByKey4(key_data: String?, key_data1: String?): MutableList<Products>
+
     @Query("select pq from Products pq where pq.buyer_name = ?1")
     fun getBySeller(productseller: Long): MutableList<Products>
 
@@ -223,18 +229,63 @@ class UserController(val usersRepository: UsersRepository, val productsRepositor
     fun pending(@RequestBody ter:ret): MutableList<Products>
     {
         var user = usersRepository.getByToken(ter.name)
-        return productsRepository.getByKey(user.id.toString(),"pending")
+
+        try {
+            if (user.userType == "customer")
+            {
+                return productsRepository.getByKey(user.id.toString(),"pending")
+            }
+            else
+            {
+                return productsRepository.getByKey3("pending")
+            }
+        }catch (e:Exception)
+        {
+            return Collections.emptyList()
+        }
     }
 
     @PostMapping("/approved")
     fun approved(@RequestBody ter:ret): MutableList<Products> {
         var user = usersRepository.getByToken(ter.name)
-        return productsRepository.getByKey(user.id.toString(),"approved")
+
+        if(ter.game == "customer")
+        {
+            return productsRepository.getByKey(user.id.toString(),"approved")
+        }
+        else
+        {
+            ;
+        }
+
+        return productsRepository.getByKey4(user.id.toString(),"approved")
     }
 
 
+    @PostMapping("/approv/{id}")
+    fun approv(@PathVariable id:String, @RequestBody ter:ret) {
 
+        var usr = usersRepository.getByToken(ter.name)
 
+        if (usr.userType == "importer")
+        {
+            var prd = productsRepository.findById(id.toLong())
+            var data = prd.get()
+
+            data.productprice = usr.id.toString()
+            data.product_status = "approved"
+            data.product_price = ter.game
+
+            productsRepository.save(data)
+        }
+
+    }
+
+    @PostMapping("/profile")
+    fun profile(@RequestBody ter:ret): Users {
+        var usr = usersRepository.getByToken(ter.name)
+        return usr
+    }
 
 
     @GetMapping("/Allusers1")
